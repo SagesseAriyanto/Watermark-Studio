@@ -64,7 +64,7 @@ def upload_watermark():
 
 def verify_uploads():
     if image_uploaded and watermark_uploaded:
-        convert.pack(pady=20)
+        convert.pack()
 
 def save_image():
     global result_image
@@ -79,15 +79,25 @@ def save_image():
 def show_preview_window():
     global result_image, display_result, preview_window
     if not preview_window or not preview_window.winfo_exists():
+        # Create a new preview window
         preview_window = tk.Toplevel()
         preview_window.title("Watermarked Image Preview")
-        preview_window.minsize(600,550)
+        preview_window.minsize(550,450)
         preview_window.resizable(False, False)
+
+        # Identify position of root window to align preview window
+        root_x = window.winfo_x()
+        root_y = window.winfo_y()
+        main_width = window.winfo_width()
+        gap = 20
+        preview_window.geometry(f"+{root_x + main_width + gap}+{root_y}")
+
+        # Create a frame to hold the preview image and save button
         preview_frame = tk.Frame(preview_window)
         preview_frame.pack(fill="both", expand=True, padx=10)
-        preview_canvas = tk.Canvas(preview_frame, width=560, height=500, bg="lightgray")
-        preview_canvas.pack(pady=10)
-        preview_canvas.create_image(280, 250, image=display_result)
+        preview_canvas = tk.Canvas(preview_frame, width= 500, height=400, bg="lightgray")
+        preview_canvas.pack()
+        preview_canvas.create_image(250, 200, image=display_result)
         save_img = tk.Button(preview_frame, text="Save", command=save_image)
         save_img.pack(pady=10)
 
@@ -125,7 +135,7 @@ def add_watermark():
 
 window = tk.Tk()
 window.title("Image Watermark Generator")
-window.minsize(600,550)
+window.minsize(600,500)
 window.resizable(False, False)
 
 
@@ -140,12 +150,12 @@ right_frame = tk.Frame(frames_container)
 right_frame.pack(side="right", fill="both", expand=True, padx=10)
 
 uploaded_image = tk.Button(left_frame, text="Upload Image", command=upload_image)           # Upload Image Button
-uploaded_image.pack(pady=10)
+uploaded_image.pack()
 image_canvas = tk.Canvas(left_frame, width=280, height=400, bg="lightgray")              # Canvas to display uploaded image
 image_canvas.pack(pady=10)
 
 uploaded_watermark = tk.Button(right_frame, text="Upload Watermark", command=upload_watermark)           # Upload Watermark Button
-uploaded_watermark.pack(pady=10)
+uploaded_watermark.pack()
 watermark_canvas = tk.Canvas(right_frame, width=280, height=400, bg="lightgray")              # Canvas to display uploaded watermark
 watermark_canvas.pack(pady=10)
 
