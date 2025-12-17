@@ -8,7 +8,8 @@ watermark_photo = None
 display_watermark = None
 image_uploaded = False
 watermark_uploaded = False
-
+result_image = None
+display_result = None
 def upload_image():
     global image_photo, image_uploaded, display_image
 
@@ -62,8 +63,18 @@ def verify_uploads():
     if image_uploaded and watermark_uploaded:
         convert.pack(pady=20)
 
+def save_image():
+    global result_image
+    if result_image:
+        save_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg;*.jpeg")]
+        )
+        if save_path:
+            result_image.save(save_path)
+
 def add_watermark():
-    global image_photo, watermark_photo
+    global image_photo, watermark_photo, result_image, display_result
     print(image_photo, watermark_photo)
 
     if image_photo and watermark_photo:
@@ -77,22 +88,31 @@ def add_watermark():
             margin = 10
             position = (image_photo.width - watermark_width - margin,       # X position from left
                         image_photo.height - watermark_height - margin)     # Y position from top
-            
+
             # Create a transparent layer same size as original image, and paste watermark onto it
             transparent_layer = Image.new('RGBA', image_photo.size, (0,0,0,0))
             transparent_layer.paste(resized_watermark, position, resized_watermark)
 
             # Combine original image with watermark layer
             result = Image.alpha_composite(image_photo, transparent_layer)
+            result_image = result
+            result.thumbnail((560, 400))
+            display_result = ImageTk.PhotoImage(result)
 
-          
+            result_frame.pack(pady=10)
+            result_canvas.pack()
+            result_canvas.delete("all")
+            result_canvas.create_image(280, 200, image=display_result)
+
+            convert.config(text="Save Image", command=save_image)
+
         except:
             return "Error applying watermark"
 
 
 window = tk.Tk()
 window.title("Image Watermark Generator")
-window.minsize(600,600)
+window.minsize(600,450)
 window.resizable(False, False)
 
 
@@ -106,7 +126,6 @@ left_frame.pack(side="left", fill="both", expand=True, padx=10)
 right_frame = tk.Frame(frames_container)
 right_frame.pack(side="right", fill="both", expand=True, padx=10)
 
-main_frame = tk.Frame(window)
 uploaded_image = tk.Button(left_frame, text="Upload Image", command=upload_image)           # Upload Image Button
 uploaded_image.pack(pady=10)
 image_canvas = tk.Canvas(left_frame, width=280, height=400, bg="lightgray")              # Canvas to display uploaded image
@@ -119,5 +138,8 @@ watermark_canvas.pack(pady=10)
 
 # Hide convert button initially, will be displayed after both uploads verified
 convert = tk.Button(window, text="Apply Watermark", command=add_watermark)
+
+result_frame = tk.Frame(window)
+result_canvas = tk.Canvas(result_frame, width=560, height=400, bg="lightgray")              # Canvas to display result image
 
 window.mainloop()
