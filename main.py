@@ -2,6 +2,8 @@ from PIL import Image, ImageTk
 import tkinter as tk
 from tkinter import filedialog
 
+from sympy import preview
+
 image_photo = None
 display_image = None
 watermark_photo = None
@@ -10,6 +12,7 @@ image_uploaded = False
 watermark_uploaded = False
 result_image = None
 display_result = None
+preview_window = None
 def upload_image():
     global image_photo, image_uploaded, display_image
 
@@ -73,6 +76,22 @@ def save_image():
         if save_path:
             result_image.save(save_path)
 
+def show_preview_window():
+    global result_image, display_result, preview_window
+    if not preview_window or not preview_window.winfo_exists():
+        preview_window = tk.Toplevel()
+        preview_window.title("Watermarked Image Preview")
+        preview_window.minsize(600,550)
+        preview_window.resizable(False, False)
+        preview_frame = tk.Frame(preview_window)
+        preview_frame.pack(fill="both", expand=True, padx=10)
+        preview_canvas = tk.Canvas(preview_frame, width=560, height=500, bg="lightgray")
+        preview_canvas.pack(pady=10)
+        preview_canvas.create_image(280, 250, image=display_result)
+        save_img = tk.Button(preview_frame, text="Save", command=save_image)
+        save_img.pack(pady=10)
+
+
 def add_watermark():
     global image_photo, watermark_photo, result_image, display_result
     print(image_photo, watermark_photo)
@@ -98,13 +117,7 @@ def add_watermark():
             result_image = result
             result.thumbnail((560, 400))
             display_result = ImageTk.PhotoImage(result)
-
-            result_frame.pack(pady=10)
-            result_canvas.pack()
-            result_canvas.delete("all")
-            result_canvas.create_image(280, 200, image=display_result)
-
-            convert.config(text="Save Image", command=save_image)
+            show_preview_window()
 
         except:
             return "Error applying watermark"
@@ -112,7 +125,7 @@ def add_watermark():
 
 window = tk.Tk()
 window.title("Image Watermark Generator")
-window.minsize(600,450)
+window.minsize(600,550)
 window.resizable(False, False)
 
 
@@ -138,8 +151,5 @@ watermark_canvas.pack(pady=10)
 
 # Hide convert button initially, will be displayed after both uploads verified
 convert = tk.Button(window, text="Apply Watermark", command=add_watermark)
-
-result_frame = tk.Frame(window)
-result_canvas = tk.Canvas(result_frame, width=560, height=400, bg="lightgray")              # Canvas to display result image
 
 window.mainloop()
