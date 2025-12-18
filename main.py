@@ -78,7 +78,7 @@ def save_image():
 
 def show_preview_window():
     global result_image, display_result, preview_window
-    if not preview_window or not preview_window.winfo_exists():
+    if preview_window is None or not preview_window.winfo_exists():
         # Create a new preview window
         preview_window = tk.Toplevel()
         preview_window.title("Watermarked Image Preview")
@@ -95,11 +95,22 @@ def show_preview_window():
         # Create a frame to hold the preview image and save button
         preview_frame = tk.Frame(preview_window)
         preview_frame.pack(fill="both", expand=True, padx=10)
-        preview_canvas = tk.Canvas(preview_frame, width= 500, height=400, bg="lightgray")
-        preview_canvas.pack()
-        preview_canvas.create_image(250, 200, image=display_result)
+
+        # Canvas to display preview image
+        preview_window.canvas = tk.Canvas(preview_frame, width= 500, height=400, bg="lightgray")
+        preview_window.canvas.pack()
+
+        # Save button
         save_img = tk.Button(preview_frame, text="Save", command=save_image)
         save_img.pack(pady=10)
+
+    preview = result_image.copy()
+    preview.thumbnail((500, 400))
+    display_result = ImageTk.PhotoImage(preview)
+
+    preview_window.canvas.delete("all")
+    preview_window.canvas.create_image(250, 200, image=display_result)
+
 
 
 def add_watermark():
