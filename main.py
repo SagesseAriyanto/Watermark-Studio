@@ -2,15 +2,21 @@ from PIL import Image, ImageTk
 import tkinter as tk
 from tkinter import filedialog
 
-image_photo = None
-display_image = None
-watermark_photo = None
-display_watermark = None
+image_photo = None              # Original uploaded image   
+display_image = None            # Display version of uploaded image\
+
+watermark_photo = None          # Original uploaded watermark    
+display_watermark = None        # Display version of uploaded watermark
+
+# Flags to verify uploads
 image_uploaded = False
 watermark_uploaded = False
+
+# Variables for result image and preview window
 result_image = None
 display_result = None
 preview_window = None
+
 def upload_image():
     global image_photo, image_uploaded, display_image
 
@@ -101,9 +107,33 @@ def show_preview_window():
         preview_window.canvas = tk.Canvas(preview_frame, width= 500, height=400, bg="lightgray")
         preview_window.canvas.pack()
 
+        # Create a frame for rotation buttons and save button
+        button_frame = tk.Frame(preview_frame)
+        button_frame.pack(pady=10)
+        
+        # Left rotation button
+        rotate_result_left = tk.Button(
+            button_frame,
+            text="⬅️",
+            command=lambda: rotate_image('result', -90),
+            font=("Arial", 12),
+            width=3,
+        )
+        rotate_result_left.pack(side="left", padx=5)
+        
         # Save button
-        save_img = tk.Button(preview_frame, text="Save", command=save_image)
-        save_img.pack(pady=10)
+        save_img = tk.Button(button_frame, text="Save", command=save_image)
+        save_img.pack(side="left", padx=5)
+        
+        # Right rotation button
+        rotate_result_right = tk.Button(
+            button_frame,
+            text="➡️",
+            command=lambda: rotate_image('result', 90),
+            font=("Arial", 12),
+            width=3,
+        )
+        rotate_result_right.pack(side="left", padx=5)
 
     preview = result_image.copy()
     preview.thumbnail((500, 400))
@@ -160,7 +190,7 @@ def add_watermark():
             return "Error applying watermark"
 
 def rotate_image(type, degrees):
-    global image_photo, display_image, watermark_photo, display_watermark
+    global image_photo, display_image, watermark_photo, display_watermark, result_image, display_result, preview_window
     if type == 'image':
         if image_photo is None:
             return
@@ -182,6 +212,18 @@ def rotate_image(type, degrees):
 
         watermark_canvas.delete("all")
         watermark_canvas.create_image(140, 200, image=display_watermark)
+    
+    elif type == 'result':
+        if result_image is None:
+            return
+        result_image = result_image.rotate(-degrees, expand=True)
+        preview = result_image.copy()
+        preview.thumbnail((500, 400))
+        display_result = ImageTk.PhotoImage(preview)
+
+        if preview_window and preview_window.winfo_exists():
+            preview_window.canvas.delete("all")
+            preview_window.canvas.create_image(250, 200, image=display_result)
 
 window = tk.Tk()
 window.title("Image Watermark Generator")
@@ -199,7 +241,7 @@ left_frame.pack(side="left", fill="both", expand=True, padx=10)
 right_frame = tk.Frame(frames_container)
 right_frame.pack(side="right", fill="both", expand=True, padx=10)
 
-uploaded_image = tk.Button(left_frame, text="Upload Image", command=upload_image)           # Upload Image Button
+uploaded_image = tk.Button(left_frame, text="image", command=upload_image)           # Upload Image Button
 uploaded_image.pack()
 image_canvas = tk.Canvas(left_frame, width=280, height=400, bg="lightgray")              # Canvas to display uploaded image
 image_canvas.pack(pady=10)
@@ -223,7 +265,7 @@ rotate_image_right = tk.Button(
 )
 rotate_image_right.pack(side="left", padx=5)         # Rotate Right Button
 
-uploaded_watermark = tk.Button(right_frame, text="Upload Watermark", command=upload_watermark)           # Upload Watermark Button
+uploaded_watermark = tk.Button(right_frame, text="watermark", command=upload_watermark)           # Upload Watermark Button
 uploaded_watermark.pack()
 watermark_canvas = tk.Canvas(right_frame, width=280, height=400, bg="lightgray")              # Canvas to display uploaded watermark
 watermark_canvas.pack(pady=10)
