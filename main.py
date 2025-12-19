@@ -101,7 +101,7 @@ def show_preview_window():
         preview_window = tk.Toplevel()
         preview_window.title("Preview")
         try:
-            preview_window.iconbitmap(resource_path('Assets/icon.ico'))
+            preview_window.iconbitmap(resource_path('Assets/icon.ico')) 
         except:
             pass  # Continue even if icon fails to load
         preview_window.minsize(550,450)
